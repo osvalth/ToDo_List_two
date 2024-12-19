@@ -2,27 +2,47 @@
   <div class="container">
     <div class="containerSon_Input">
       <div class="input-group">
-          <input class="form-control" placeholder="Agregar una nueva tarea" v-model="texto">
-          <span class="input-group-btn">              
-              <img src="/img/add.svg" @click="Agregar" style="width: 2.2em; min-width: auto;"/>
-          </span>
+        <input
+          class="form-control"
+          placeholder="Agregar una nueva tarea"
+          v-model="texto"
+        />
+        <span class="input-group-btn">
+          <img
+            src="/img/add.svg"
+            @click="Agregar"
+            style="width: 2.2em; min-width: auto;"
+          />
+        </span>
       </div>
     </div>
     <div class="containerSon_List">
       <div class="listHead">
-        <span>ToDo list by Iron Bit</span>          
-        <img src="/img/recycle-bin.svg" @click="delete_full" style="width: 1.5em; min-width: auto;" />
+        <span>ToDo list by Iron Bit</span>
+        <img
+          src="/img/recycle-bin.svg"
+          @click="delete_full"
+          style="width: 1.5em; min-width: auto;"
+        />
       </div>
       <div class="redondear">
         <div v-if="lista.length">
-          <div v-for="todo in lista" :key="todo.id">
+          <div v-for="(todo, index) in lista" :key="todo.id">
             <div class="listBody">
-              <span class="texto-item">{{ todo.nuevoTexto }}</span>
-              <img  src="/img/remove.svg" v-on:click="delete_one(todo.id)" style="width: 1.5em; min-width: auto;"/>
+              <span
+                class="texto-item"
+                @dblclick="editarTarea(todo, index)"
+                >{{ todo.nuevoTexto }}</span
+              >
+              <img
+                src="/img/remove.svg"
+                @click="delete_one(todo.id)"
+                style="width: 1.5em; min-width: auto;"
+              />
             </div>
           </div>
         </div>
-        <p v-else>{{textoAux}}</p>
+        <p v-else>{{ textoAux }}</p>
       </div>
     </div>
   </div>
@@ -32,30 +52,56 @@
 export default {
   data() {
     return {
-      textoAux:'No hay ToDo´s, tomate un café !',
-      texto:'',
-      lista:[]
-    }
+      textoAux: "No hay ToDo´s, tomate un café !",
+      texto: "",
+      lista: [],
+    };
+  },
+  mounted() {
+    this.cargarDesdeLocalStorage();
   },
   methods: {
-    Agregar: function(){
+    Agregar() {
+      if (this.texto.trim() === "") return alert("La tarea no puede estar vacía");
+
       this.lista.push({
-        nuevoTexto: this.texto
-      })
-      this.texto='';
-      console.log(this.lista)
+        id: Date.now(),
+        nuevoTexto: this.texto.trim(),
+      });
+      this.texto = "";
+      this.guardarEnLocalStorage();
     },
-    delete_full: function(){
-      this.lista.splice(0)
-      alert('Se estan eliminado los item de la lista')
-      console.log(this.lista)
+    delete_full() {
+      if (confirm("¿Estás seguro de eliminar todas las tareas?")) {
+        this.lista = [];
+        this.guardarEnLocalStorage();
+      }
     },
-    delete_one:function(del1){
-      this.lista.splice(del1, 1)
-      alert('Se esta eliminado un item de la lista')
-    }
+    delete_one(id) {
+      this.lista = this.lista.filter((todo) => todo.id !== id);
+      this.guardarEnLocalStorage();
+    },
+    editarTarea(todo, index) {
+      const nuevoTexto = prompt(
+        "Edita la tarea:",
+        todo.nuevoTexto
+      );
+      if (nuevoTexto !== null && nuevoTexto.trim() !== "") {
+        this.lista[index].nuevoTexto = nuevoTexto.trim();
+        this.guardarEnLocalStorage();
+      }
+    },
+    guardarEnLocalStorage() {
+      localStorage.setItem("todo-list", JSON.stringify(this.lista));
+    },
+    cargarDesdeLocalStorage() {
+      const datosGuardados = localStorage.getItem("todo-list");
+      if (datosGuardados) {
+        this.lista = JSON.parse(datosGuardados);
+      }
+    },
   },
-}
+};
 </script>
 
 <style>
