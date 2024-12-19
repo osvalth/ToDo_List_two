@@ -14,5 +14,8 @@
     "bootstrap-vue": "^2.15.0",
     "nuxt": "^2.14.0"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "engines": {
+    "node": "18"
+  }
 }
